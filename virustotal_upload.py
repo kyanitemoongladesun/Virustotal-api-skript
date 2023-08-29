@@ -15,3 +15,5 @@ client.scan_file(file,wait_for_completion=True)
 
 # Close the VirusTotal client connection
 client.close
+
+print('All Scans Completed')
