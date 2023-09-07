@@ -28,30 +28,35 @@ for root,dirs ,filename in os.walk(folder_path):
     filepath = os.path.join(folder_path, filename)
     # Check if file is not a directory
     if os.path.isfile(filepath):
-        if (os.path.getsize(file_path) / (1024 * 1024)) >= 650:
-            large_files.append(filepath)
-        else:
-            # Scan the file and wait for completion
-            with open(filepath, 'rb') as f:
-                analysis = client.scan_file(f, wait_for_completion=True)
+        try:
+            if (os.path.getsize(file_path) / (1024 * 1024)) >= 650:
+                large_files.append(filepath)
+            else:
+                # Scan the file and wait for completion
+                with open(filepath, 'rb') as f:
+                    analysis = client.scan_file(f, wait_for_completion=True)
 
-        # Update counters for scan results
-        total_scanned += 1
-        if 'malicious' in analysis.stats and analysis.stats['malicious'] != 0:
-            is_malicious()
+            # Update counters for scan results
+            total_scanned += 1
+            if 'malicious' in analysis.stats and analysis.stats['malicious'] != 0:
+                is_malicious()
 
-        # Print scan results
-        print(f"{filename}:")
-        print(f"Analysis ID: {analysis.id}")
-        print(f"Status: {analysis.status}")
-        if 'total' in analysis.stats:
-            print(f"Total number of engines: {analysis.stats['total']}")
-        if 'malicious' in analysis.stats:
-            print(f"Number of engines that detected the file as malicious: {analysis.stats['malicious']}")
-        for scan in analysis.results:
-            print(f"{scan}: {analysis.results[scan]['result']}")
-        print(f"{total_scanned} of {num_files}")
-        print('')
+            # Print scan results
+            print(f"{filename}:")
+            print(f"Analysis ID: {analysis.id}")
+            print(f"Status: {analysis.status}")
+            if 'total' in analysis.stats:
+                print(f"Total number of engines: {analysis.stats['total']}")
+            if 'malicious' in analysis.stats:
+                print(f"Number of engines that detected the file as malicious: {analysis.stats['malicious']}")
+            for scan in analysis.results:
+                print(f"{scan}: {analysis.results[scan]['result']}")
+            print(f"{total_scanned} of {num_files}")
+            print('')
+            
+        except vt.error.APIError as e:
+            # Handle API errors
+            print(f"An error occurred while scanning {filename}: {e}")
              
 # Close the VirusTotal client connection
 client.close
