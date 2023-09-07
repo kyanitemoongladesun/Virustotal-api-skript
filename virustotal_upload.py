@@ -15,7 +15,14 @@ num_files = len([f for f in os.listdir(folder_path) if os.path.isfile(os.path.jo
 
 # Define a list to store the file paths of files larger than 650MB
 large_files = []
-
+# Initialize counters for scan results
+total_scanned = 0
+total_malicious = 0
+malicious_files = []
+def is_malicious():
+    total_malicious += 1
+    malicious_files.append((filename, analysis.stats['malicious']))
+    
 # Iterate through all files in folder
 for root,dirs ,filename in os.walk(folder_path):
     filepath = os.path.join(folder_path, filename)
