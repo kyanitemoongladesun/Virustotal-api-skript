@@ -22,7 +22,7 @@ malicious_files = []
 def is_malicious():
     total_malicious += 1
     malicious_files.append((filename, analysis.stats['malicious']))
-    
+
 # Iterate through all files in folder
 for root,dirs ,filename in os.walk(folder_path):
     filepath = os.path.join(folder_path, filename)
@@ -35,6 +35,24 @@ for root,dirs ,filename in os.walk(folder_path):
             with open(filepath, 'rb') as f:
                 analysis = client.scan_file(f, wait_for_completion=True)
 
+        # Update counters for scan results
+        total_scanned += 1
+        if 'malicious' in analysis.stats and analysis.stats['malicious'] != 0:
+            is_malicious()
+
+        # Print scan results
+        print(f"{filename}:")
+        print(f"Analysis ID: {analysis.id}")
+        print(f"Status: {analysis.status}")
+        if 'total' in analysis.stats:
+            print(f"Total number of engines: {analysis.stats['total']}")
+        if 'malicious' in analysis.stats:
+            print(f"Number of engines that detected the file as malicious: {analysis.stats['malicious']}")
+        for scan in analysis.results:
+            print(f"{scan}: {analysis.results[scan]['result']}")
+        print(f"{total_scanned} of {num_files}")
+        print('')
+             
 # Close the VirusTotal client connection
 client.close
 
