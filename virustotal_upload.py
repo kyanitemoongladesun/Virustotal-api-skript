@@ -1,5 +1,6 @@
 import os
 import vt
+import time
 
 # Replace with your actual VirusTotal API key
 API_KEY = ''
@@ -9,6 +10,15 @@ client = vt.Client(API_KEY)
 
 # Replace 'path/to/folder' with the actual path of the folder you want to scan
 file = 'path/to/folder'
+
+
+# Set rate limiting parameters
+RATE_LIMIT = 4  # Maximum number of lookups per minute
+LOOKUP_INTERVAL = 60 / RATE_LIMIT  # Time between lookups in seconds
+
+# Set daily quota parameters
+DAILY_QUOTA = 500  # Maximum number of lookups per day
+lookup_count = 0  # Counter for number of lookups made today
 
 #counts all files in Directory and Subdirectorys
 num_files = len([f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))])
@@ -29,6 +39,13 @@ for root,dirs ,filename in os.walk(folder_path):
     # Check if file is not a directory
     if os.path.isfile(filepath):
         try:
+            # Check rate limiting and daily quota limits
+            if lookup_count >= DAILY_QUOTA:
+                print("Daily quota reached. Exiting...")
+                break
+            elif lookup_count % RATE_LIMIT == 0 and lookup_count > 0:
+                time.sleep(LOOKUP_INTERVAL)
+
             if (os.path.getsize(file_path) / (1024 * 1024)) >= 650:
                 large_files.append(filepath)
             else:
@@ -53,14 +70,21 @@ for root,dirs ,filename in os.walk(folder_path):
                 print(f"{scan}: {analysis.results[scan]['result']}")
             print(f"{total_scanned} of {num_files}")
             print('')
-            
+
         except vt.error.APIError as e:
             # Handle API errors
             print(f"An error occurred while scanning {filename}: {e}")
              
 # Close the VirusTotal client connection
 client.close
-
+# Print summary of scan results
+print(f"Scanned {total_scanned} files.")
+if total_malicious > 0:
+    print(f"{total_malicious} files detected as malicious:")
+    for filename, num_engines in malicious_files:
+        print(f"{filename} ({num_engines} engines detected as malicious)")
+else:
+    print("No malicious files detected.")
 # Print the list of large files at the end
 if large_files:
     print("The following files are larger than 650MB:")
