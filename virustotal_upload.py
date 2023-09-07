@@ -9,7 +9,7 @@ API_KEY = ''
 client = vt.Client(API_KEY)
 
 # Replace 'path/to/folder' with the actual path of the folder you want to scan
-file = 'path/to/folder'
+folder_path = ''
 
 
 # Set rate limiting parameters
