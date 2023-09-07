@@ -13,8 +13,14 @@ file = 'path/to/folder'
 #counts all files in Directory and Subdirectorys
 num_files = len([f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))])
 
-# Submit the file for scanning and wait for the scan to complete
-client.scan_file(file,wait_for_completion=True)
+# Iterate through all files in folder
+for root,dirs ,filename in os.walk(folder_path):
+    filepath = os.path.join(folder_path, filename)
+    # Check if file is not a directory
+    if os.path.isfile(filepath):
+        # Scan the file and wait for completion
+        with open(filepath, 'rb') as f:
+            analysis = client.scan_file(f, wait_for_completion=True)
 
 # Close the VirusTotal client connection
 client.close
