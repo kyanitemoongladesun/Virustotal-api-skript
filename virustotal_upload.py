@@ -20,7 +20,16 @@ DAILY_QUOTA = 500  # Maximum number of lookups per day
 LOOKUP_COUNT = 0  # Counter for number of lookups made today
 
 #counts all files in Directory and Subdirectorys
-num_files = len([f for f in os.listdir(FOLDER_PATH) if os.path.isfile(os.path.join(FOLDER_PATH, f))])
+def count_files_in_directory(path):
+    file_count = 0
+
+    for root, directories, files in os.walk(path):
+        # Count files in the current directory
+        file_count += len(files)
+
+    return file_count
+
+num_files = count_files_in_directory(FOLDER_PATH)
 print(f"Number of files in directory: {num_files}")
 # Define a list to store the file paths of files larger than 650MB
 large_files = []
