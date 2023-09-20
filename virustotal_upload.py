@@ -9,7 +9,7 @@ API_KEY = ''
 client = vt.Client(API_KEY)
 
 # Replace 'path/to/folder' with the actual path of the folder you want to scan
-folder_path = 'path/to/folder'
+FOLDER_PATH = 'path/to/folder'
 
 
 # Set rate limiting parameters
@@ -18,33 +18,33 @@ LOOKUP_INTERVAL = 60 / RATE_LIMIT  # Time between lookups in seconds
 
 # Set daily quota parameters
 DAILY_QUOTA = 500  # Maximum number of lookups per day
-lookup_count = 0  # Counter for number of lookups made today
+LOOKUP_COUNT = 0  # Counter for number of lookups made today
 
 #counts all files in Directory and Subdirectorys
-num_files = len([f for f in os.listdir(folder_path) if os.path.isfile(os.path.join(folder_path, f))])
+num_files = len([f for f in os.listdir(FOLDER_PATH) if os.path.isfile(os.path.join(FOLDER_PATH, f))])
 print(f"Number of files in directory: {num_files}")
 # Define a list to store the file paths of files larger than 650MB
 large_files = []
 # Initialize counters for scan results
-total_scanned = 0
-total_malicious = 0
+TOTAL_SCANNED = 0
+TOTAL_MALICIOUS = 0
 malicious_files = []
 def is_malicious():
-    total_malicious += 1
+    TOTAL_MALICIOUS += 1
     malicious_files.append((filename, analysis.stats['malicious']))
 
 # Iterate through all files in folder
-for root,dirs ,filenames in os.walk(folder_path):
+for root,dirs ,filenames in os.walk(FOLDER_PATH):
     for filename in filenames:
         filepath = os.path.join(root, filename)
         # Check if file is not a directory
         if os.path.isfile(filepath):
             try:
                 # Check rate limiting and daily quota limits
-                if lookup_count >= DAILY_QUOTA:
+                if LOOKUP_COUNT >= DAILY_QUOTA:
                     print("Daily quota reached. Exiting...")
                     break
-                elif lookup_count % RATE_LIMIT == 0 and lookup_count > 0:
+                elif LOOKUP_COUNT % RATE_LIMIT == 0 and LOOKUP_COUNT > 0:
                     time.sleep(LOOKUP_INTERVAL)
 
                 if (os.path.getsize(filepath) / (1024 * 1024)) >= 650:
@@ -55,7 +55,7 @@ for root,dirs ,filenames in os.walk(folder_path):
                         analysis = client.scan_file(f, wait_for_completion=True)
 
                 # Update counters for scan results
-                total_scanned += 1
+                TOTAL_SCANNED += 1
                 if 'malicious' in analysis.stats and analysis.stats['malicious'] != 0:
                     is_malicious()
 
@@ -69,7 +69,7 @@ for root,dirs ,filenames in os.walk(folder_path):
                     print(f"Number of engines that detected the file as malicious: {analysis.stats['malicious']}")
                 for scan in analysis.results:
                     print(f"{scan}: {analysis.results[scan]['result']}")
-                print(f"{total_scanned} of {num_files}")
+                print(f"{TOTAL_SCANNED} of {num_files}")
                 print('')
 
             except vt.error.APIError as e:
@@ -79,9 +79,9 @@ for root,dirs ,filenames in os.walk(folder_path):
 # Close the VirusTotal client connection
 client.close
 # Print summary of scan results
-print(f"Scanned {total_scanned} files.")
-if total_malicious > 0:
-    print(f"{total_malicious} files detected as malicious:")
+print(f"Scanned {TOTAL_SCANNED} files.")
+if TOTAL_MALICIOUS > 0:
+    print(f"{TOTAL_MALICIOUS} files detected as malicious:")
     for filename, num_engines in malicious_files:
         print(f"{filename} ({num_engines} engines detected as malicious)")
 else:
