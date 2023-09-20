@@ -1,6 +1,6 @@
 import os
-import vt
 import time
+import vt
 
 # Replace with your actual VirusTotal API key
 API_KEY = ''
