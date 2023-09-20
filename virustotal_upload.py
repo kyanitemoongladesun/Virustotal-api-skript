@@ -11,7 +11,6 @@ client = vt.Client(API_KEY)
 # Replace 'path/to/folder' with the actual path of the folder you want to scan
 FOLDER_PATH = 'path/to/folder'
 
-
 # Set rate limiting parameters
 RATE_LIMIT = 4  # Maximum number of lookups per minute
 LOOKUP_INTERVAL = 60 / RATE_LIMIT  # Time between lookups in seconds
